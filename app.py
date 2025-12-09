@@ -41,7 +41,7 @@ section = st.sidebar.radio(
 # 1. LOAD + CLEAN DATA & BUILD MODELS (ONCE)
 # ---------------------------------------------------------
 @st.cache_data
-def load_data(path: str = "project_risk_raw_dataset.csv") -> pd.DataFrame:
+def load_data(path: str = "data/raw_data/project_risk_raw_dataset.csv") -> pd.DataFrame:
     df = pd.read_csv(path)
 
     # Basic cleaning (same as notebook)
