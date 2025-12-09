@@ -38,7 +38,7 @@ section = st.sidebar.radio(
 )
 
 # ---------------------------------------------------------
-# 1. LOAD + CLEAN DATA & BUILD MODELS (ONCE)
+# 1. Data Loading, Cleaning, and Model Preparation
 # ---------------------------------------------------------
 @st.cache_data
 def load_data(path: str = "data/raw_data/project_risk_raw_dataset.csv") -> pd.DataFrame:
@@ -57,10 +57,10 @@ def load_data(path: str = "data/raw_data/project_risk_raw_dataset.csv") -> pd.Da
 
 @st.cache_resource
 def train_models(df: pd.DataFrame):
-    # -----------------------------
-    # Features & target
-    # -----------------------------
-    df_model = df.drop(columns=["Project_ID"])  # ID not useful
+    # -------------------------------------------------
+    # Define Input Features (X) and Target Variable (y)
+    # -------------------------------------------------
+    df_model = df.drop(columns=["Project_ID"])  # Project ID will not be useful
 
     X = df_model.drop(columns=["Risk_Level"])
     y = df_model["Risk_Level"]
@@ -68,7 +68,8 @@ def train_models(df: pd.DataFrame):
     numeric_cols = X.select_dtypes(include=[np.number]).columns.tolist()
     categorical_cols = [c for c in X.columns if c not in numeric_cols]
 
-    # Preprocessor: scale numbers + one-hot encode categoricals
+    # Preprocessing – scale numeric features and one-hot encode categorical features
+
     preprocessor = ColumnTransformer(
         transformers=[
             ("num", StandardScaler(), numeric_cols),
@@ -95,9 +96,9 @@ def train_models(df: pd.DataFrame):
     report_lr = classification_report(y_test, y_pred_lr, output_dict=False)
     cm_lr = confusion_matrix(y_test, y_pred_lr, labels=["Critical", "High", "Medium", "Low"])
 
-    # -------------------------------
-    # 2) Random Forest (flat 4-class)
-    # -------------------------------
+    # ------------------
+    # 2) Random Forest 
+    # ------------------
     rf_pipe = Pipeline(
         steps=[
             ("prep", preprocessor),
@@ -124,7 +125,7 @@ def train_models(df: pd.DataFrame):
     #    Stage 2a: Critical vs High
     #    Stage 2b: Medium vs Low
     # ----------------------------------------------------
-    # Stage 1 labels
+    # Stage 1
     y_highflag = y_train.isin(["High", "Critical"]).astype(int)
     rf_stage1 = Pipeline(
         steps=[
@@ -139,7 +140,7 @@ def train_models(df: pd.DataFrame):
     )
     rf_stage1.fit(X_train, y_highflag)
 
-    # Stage 2 high-branch (High vs Critical)
+    # Stage 2 for high-branch (High vs Critical)
     mask_high = y_train.isin(["High", "Critical"])
     X_train_high = X_train[mask_high]
     y_train_high = y_train[mask_high].map({"High": 0, "Critical": 1})
@@ -157,7 +158,7 @@ def train_models(df: pd.DataFrame):
     )
     rf_stage2_high.fit(X_train_high, y_train_high)
 
-    # Stage 2 low-branch (Low vs Medium)
+    # Stage 2 for low-branch (Low vs Medium)
     mask_low = y_train.isin(["Low", "Medium"])
     X_train_low = X_train[mask_low]
     y_train_low = y_train[mask_low].map({"Low": 0, "Medium": 1})
@@ -220,7 +221,7 @@ X, y, X_train, X_test, y_train, y_test, metrics, models, numeric_cols, categoric
 )
 
 # ---------------------------------------------------------
-# SMALL HELPERS
+# Supporting Function for confusion matrix as heatmap
 # ---------------------------------------------------------
 def plot_confusion_matrix(cm, labels):
     fig, ax = plt.subplots(figsize=(4, 3))
@@ -248,7 +249,7 @@ def hierarchical_predict_single(row: pd.Series) -> str:
 if section == "Introduction":
     st.header("Introduction")
 
-    # --- Course & Student Info ---
+    # --- Course & General Info ---
     with st.container():
         st.subheader("Course & Project Information")
         col_a, col_b = st.columns(2)
@@ -273,7 +274,7 @@ if section == "Introduction":
 elif section == "Project Overview":
     st.header("Project Overview")
 
-    # --- TABS FOR CLEAN LAYOUT ---
+    # --- USING TABS FOR CLEAN LAYOUT ---
     tab1, tab2 = st.tabs(["Business Problem", "Goal of this Model"])
 
     with tab1:
@@ -337,7 +338,7 @@ elif section == "Data & EDA":
         ["Numerical Feature Distribution", "Outlier Detection", "Categorical Feature Distribution", "Feature vs Risk Level"]
     )
 
-    # ---------- Tab 1: numeric distributions ----------
+    # ---------- Tab 1: Numeric distributions ----------
     with tab1:
         st.subheader("Numerical Feature Distribution (Histogram)")
 
@@ -353,7 +354,7 @@ elif section == "Data & EDA":
         ax.set_title(f"Distribution of {num_col}", fontsize=12)
         st.pyplot(fig)
 
-    # ---------- Tab 2: outlier plots ----------
+    # ---------- Tab 2: Outlier plots ----------
     with tab2:
         st.subheader("Outlier Detection (Boxplot)")
 
@@ -369,7 +370,7 @@ elif section == "Data & EDA":
         ax.set_title(f"Outliers in {out_col}", fontsize=12)
         st.pyplot(fig)
 
-    # ---------- Tab 3: categorical distributions ----------
+    # ---------- Tab 3: Categorical distributions ----------
     with tab3:
         st.subheader("Categorical Feature Distribution")
 
@@ -502,7 +503,7 @@ elif section == "Model Performance":
 elif section == "Feature Importance":
     st.header("Feature Importance")
 
-    # Get feature importance from RF model
+    # Get feature importance from Random Forest model
     rf_model = models["rf_flat"].named_steps["clf"]
     preprocessor = models["rf_flat"].named_steps["prep"]
 
@@ -674,8 +675,6 @@ elif section == "Results & Discussion":
     - The model assumes:
       - Past project patterns repeat in future projects
  """)
-
-
 
 
 # ---------------------------------------------------------
