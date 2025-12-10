@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 # ---------------------------------------------------------
-# 0. BASIC PAGE CONFIG
+# 0. Basic Page Configuration
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="AI-Based Project Risk Prediction",
@@ -96,9 +96,9 @@ def train_models(df: pd.DataFrame):
     report_lr = classification_report(y_test, y_pred_lr, output_dict=False)
     cm_lr = confusion_matrix(y_test, y_pred_lr, labels=["Critical", "High", "Medium", "Low"])
 
-    # ------------------
+    # -------------------------
     # 2) Random Forest 
-    # ------------------
+    # -------------------------
     rf_pipe = Pipeline(
         steps=[
             ("prep", preprocessor),
@@ -398,9 +398,8 @@ elif section == "Data & EDA":
     - EDA helped identify **key risk-driving factors** and guided model selection.
     """)
 
-    # -------------------------------
-    # TAB 4 – FEATURE vs RISK_LEVEL
-    # -------------------------------
+    # ---------------Tab 4: Feature vs Risk_Level-----------------------
+
     with tab4:
         st.subheader("How a Feature Relates to Risk_Level")
 
@@ -617,7 +616,7 @@ elif section == "Demo":
 
 
 # ---------------------------------------------------------
-# SECTION: Results & Discussion
+# SECTION: RESULTS & DISCUSSIONS
 # ---------------------------------------------------------
 elif section == "Results & Discussion":
     st.header("Results & Discussion")
