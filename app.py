@@ -692,7 +692,7 @@ elif section == "Conclusion & Recommendations":
     - Predicts project risk as:
       - **Critical | High | Medium | Low**
     - Achieved:
-      -**72% accuracy using Logistic Regression**
+      - **72% accuracy using Logistic Regression**
     """)
 
     st.subheader("What Organizations Should Do")
